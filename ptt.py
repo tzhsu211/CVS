@@ -2,28 +2,37 @@ import pandas as pd
 import re, time, requests
 from tqdm.auto import tqdm
 from bs4 import BeautifulSoup
-import warnings
 
-warnings.filterwarnings("always")
-
-def remove_url(text:str) -> str:
+def review_remove(text:str) -> str:
     '''
     remove all the urls in content (mainly pics)
-    '''
-    
+    '''  
     url_pattern = r'http[s]?://[^\s]+'
-    
-    modified_text = re.sub(url_pattern, '', text)
-    modified_text = re.sub(r"\n+", "\n", modified_text)
-    
-    return modified_text
+
+    remove_patterns = [
+        r"(圖文內容 請務必圖文獨立 不可單獨貼網址或單獨文字內容)",
+        r"與板工打勾勾約定:",
+        r"此商品文之圖文皆為發文者原創，實際個人拍攝",
+        r"若圖片內容為轉載，將附上出處。",
+        r"針對商品之評論與評價皆建立於個人之實際體驗。",
+        r"_______以上閱讀完畢Ctrl\+K刪除以示確實閱讀約定事項\\OuO。",
+        r"未刪除視同未閱讀，板工保留不告知刪文之權利",
+        r"===+" 
+    ]
+    for pattern in remove_patterns:
+        text = re.sub(pattern, "", text)
+
+    text = re.sub(url_pattern, '', text)
+
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
 
 def store(text:str) -> str:
     '''
     Change store name to standardized version.
     '''
-    s = text[0]
-    
+    s = text[0] 
     if s == '全':
         return "全家"
     elif s == '7' or s == '統' or text == '小7':
@@ -41,18 +50,14 @@ def score(text:str):
     '''
     score_ = re.sub(r"\(未滿60分為不推薦\)", "", text)
     score_ = re.search(r"(\d+)", score_)
-    
-    if score_:
-        return score_.group(1)
-    return None
+    return score_.group(1) if score_ else None
     
     
 def title(text: str) -> str:
     '''
     Clean data (e.g., remove unwanted text like "區域型商品請註明").
     '''
-    modified_text = re.sub(r"\(區域型商品請註明 試吃試用品請標示價格0元\)", "", text)
-    return modified_text
+    return re.sub(r"\(區域型商品請註明 試吃試用品請標示價格0元\)", "", text)
 
 def fetch_page(url: str, retry_count: int):
     '''
@@ -65,14 +70,10 @@ def fetch_page(url: str, retry_count: int):
                 return response
             else:
                 print(f"Error: {url} return status code {response.status_code}")
-                
         except requests.exceptions.RequestException as e:
-            print(f"Error {e}, Retry...")
-            
+            print(f"Error {e}, Retry...")    
         time.sleep(1)
-        
         print(f"Failed to connect to {url}")
-        
         return None
     
 def fetch_article(page_num:int, base_url:str) -> list:
@@ -82,15 +83,12 @@ def fetch_article(page_num:int, base_url:str) -> list:
     '''
     url = base_url.format(page_num)
     response = fetch_page(url= url, retry_count=3)
-    
     if not response:
         return []
-    
     soup = BeautifulSoup(response.text,'html.parser')
     articles = soup.find_all('div', class_ = 'r-ent')
     
-    article_link = []
-    
+    article_link = []   
     for article in articles:
         title_div = article.find('div', class_ = 'title')
         if title_div:
@@ -98,15 +96,13 @@ def fetch_article(page_num:int, base_url:str) -> list:
             if title_text.startswith('[商品]'):
                 link = title_div.find('a')['href']
                 article_link.append(link)
-
     return article_link
 
 def parse_content(content:str, article_link: str) -> dict:
     '''
     parse the product detail from the content.
     return a dict
-    '''
-    
+    '''   
     product_data = {
         'product': '',
         'link':article_link,
@@ -115,14 +111,14 @@ def parse_content(content:str, article_link: str) -> dict:
         'rating':'',
         'review': ''
     }
-    
+
     content = title(content)
     
     price_section = re.search(r"【商品名稱/價格】：\s*(.*?)\s*(?=\n|【)", content, re.DOTALL)
     if price_section and price_section.group(1).strip():
         price = price_section.group(1).strip().replace('\n\n', '\n')
         price = re.sub(r"[商品]", '', price)
-        if len(price)<3:
+        if len(price)<4:
             return None
         product_data['product'] = price
 
@@ -137,15 +133,14 @@ def parse_content(content:str, article_link: str) -> dict:
         rating = rating_section.group(1).strip() if rating_section else None
         product_data['rating'] = score(rating)
     
-    review_section = re.search(r"【心得】：\s*?(.*?)--\n", content, re.DOTALL)
+    review_section = re.search(r"【心得】：\s*(.*?)(?=【商品名稱/價格】|--\n)", content, re.DOTALL)
     if review_section:
         review_text = review_section.group(1).strip() if review_section else ''
-        review_text = remove_url(review_text).strip()
+        review_text = review_remove(review_text).strip()
         product_data['review'] = review_text
         
     if all(product_data[key] for key in product_data):
-        return product_data
-    
+        return product_data    
     return None
         
 def product_details(link: str):
@@ -154,7 +149,6 @@ def product_details(link: str):
     '''
     article_link = f"https://www.ptt.cc{link}"
     article_response = fetch_page(article_link,3)
-    
     if not article_response:
         return None
     
@@ -163,25 +157,34 @@ def product_details(link: str):
     
     if content:
         return parse_content(content.text, article_link)
-    else:
-        return None
+    return None
     
 if __name__ == '__main__':
     base_url = "https://www.ptt.cc/bbs/CVS/index{}.html"
     data = []
-    for page_num in tqdm(range(3100, 3150)):
+    total_products = 0
+
+    for page_num in tqdm(range(2180, 3180)):
         article_links = fetch_article(page_num, base_url)
+        page_products = 0
             
         for link in article_links:
             product_data = product_details(link = link)
             if product_data:
                 data.append(product_data)
+                page_products+=1
         
+        total_products+= page_products
+        print(f"\nNum of proudcts in page{page_num} :{page_products}, total num of products :{total_products}")
         time.sleep(1)  # Sleep between requests to avoid overloading the server
         
         # Save the data to a CSV file
-        df = pd.DataFrame(data)
-        df.to_csv('cvs_products.csv', index=False, encoding='utf-8')
-        print("Data saved: cvs_products.csv")
+        if page_num %10 ==0:
+            df = pd.DataFrame(data)
+            df.to_csv('cvs_products.csv', index=False, encoding='utf-8')
+            print("Data saved: cvs_products.csv")
 
+    print(f"All data saves, total num of products {total_products}")
+    df = pd.DataFrame(data)
+    df.to_csv('cvs_products.csv', index=False, encoding='utf-8')
         
