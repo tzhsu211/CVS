@@ -1,0 +1,12 @@
+pandas
+requests
+tqdm
+beautifulsoup4
+torch
+transformers
+scikit-learn
+datasets
+matplotlib
+tensorboard
+tensorflow-cpu
+jupyter

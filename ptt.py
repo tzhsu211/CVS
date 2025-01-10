@@ -44,13 +44,18 @@ def store(text:str) -> str:
     else:
         return None
     
-def score(text:str):
+def score(text: str):
     '''
     Extract score from text (returns the number score).
     '''
     score_ = re.sub(r"\(未滿60分為不推薦\)", "", text)
     score_ = re.search(r"(\d+)", score_)
-    return score_.group(1) if score_ else None
+
+    if score_:
+        score_value = int(score_.group(1))
+        if 0 <= score_value <= 100:
+            return score_value
+    return None
     
     
 def title(text: str) -> str:
