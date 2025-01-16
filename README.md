@@ -21,6 +21,7 @@ This dataset is collected from the [商品] posts on the PTT CVS board using web
 * **Review 心得**: The user's detailed review, often including text and possibly image links.
 
 Below is an example of the dataset:
+
 * **Product name/price**: 素花枝丸/49NTD
 * **Link**: https://www.ptt.cc/bbs/CVS/M.1570728137.A.0E7.html
 * **Store/Brand Name**: 7-11
@@ -28,6 +29,7 @@ Below is an example of the dataset:
 * **Review**: 好吃不油膩，缺點是有點貴！希望未來出更多素食產品~~
 
 ## Data Collection and Cleaning
+
 ### Data Collection (Web Scraping)
 The dataset is collected through web scraping from the PTT CVS board, a popular online forum in Taiwan. We use Python's requests library to fetch the pages, and BeautifulSoup to parse the HTML content. The scraper specifically targets posts that start with "[商品]", indicating that they are product-related discussions.
 
