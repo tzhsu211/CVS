@@ -8,5 +8,5 @@ scikit-learn
 datasets
 matplotlib
 tensorboard
-tensorflow-cpu
+tensorflow
 jupyter
