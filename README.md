@@ -8,8 +8,6 @@ This project demonstrates a system for predicting product ratings based on revie
 * **Model Training**: The reviews and ratings are used to fine-tune two pre-trained models: `albert-tiny-chinese-ws` (a small version of ALBERT) and `ckiplab/albert-base-chinese-ws` (a base version of ALBERT). The models are fine-tuned on the reviews to predict product ratings.
  
 * **Evaluation**: The model's performance is evaluated using Mean Squared Error (MSE) and R-squared (R2). Training progress is also monitored via TensorBoard.
-
-* **Dockerized Setup**: The entire environment is packaged into a Docker container, making it easy to set up, run, and scale the application.
  
 ## Dataset
 This dataset is collected from the [商品] posts on the PTT CVS board using web scraping. It contains user reviews of convenience store products along with corresponding ratings. Each entry includes the product name, price, store name, product specifications, caloric content, rating, and the user's review. This dataset is intended for predicting ratings based on the review content.
@@ -102,10 +100,5 @@ The **base model** performed significantly better than the tiny model, with the 
 ## Evaluation
 The evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
 
-## Dockerized Setup
-
-   
-## Setup and Installation
 ### Prerequisites
 * Python 3.x
-* Docker (for Dockerized setup)
