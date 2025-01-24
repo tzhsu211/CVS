@@ -51,54 +51,90 @@ After collecting the raw data, several cleaning steps are performed on the produ
 ## Model Training
 
 ### Model Selection and Initialization
-In this project, we fine-tune two pre-trained ALBERT models for the regression task:
+In this project, we fine-tuned four pre-trained ALBERT and BERT models for the regression task:
 - **albert-tiny-chinese-ws**: A lightweight, smaller variant of ALBERT.
 - **ckiplab/albert-base-chinese-ws**: A larger, base variant of ALBERT.
+- **ckiplab/bert-base-chinese-ws**: Base variant of BERT.
+- **google/bert-base-chinese**: Google BERT base model.
+BERT is a pre-trained NLP model initially introduced by Google. It is a large model that leverages a bidirectional Transformer architecture to capture the context of words from both the left and the right sides. While BERT achieves excellent performance on a variety of NLP tasks, its large size makes it computationally expensive.
 
-Both models use the **bert-base-chinese** tokenizer for tokenization. We aim to compare the impact of model size (tiny vs. base) on regression performance for predicting product ratings from reviews.
+ALBERT (A Lite BERT) is a smaller, more efficient variant of BERT. ALBERT reduces the model size by sharing parameters across layers, which significantly reduces the total number of parameters compared to BERT. Despite this reduction in size, ALBERT aims to match or even surpass BERT's performance on certain tasks. This efficiency is achieved through techniques like parameter sharing and factorized embedding parameterization, allowing ALBERT to maintain strong performance while being more computationally efficient.
 
 ### Model Structure Adjustment
-Since this is a regression task, both models' final layers are replaced with a linear layer suitable for regression. The last layer outputs a single value representing the predicted score for the product review.
+Since this is a regression task, all models' final layers were replaced with a linear layer suitable for regression. The last layer outputs a single value representing the predicted score for the product review.
 
 ### Training and Evaluation
-The models were trained using Hugging Face Transformers, and the training progress was monitored via TensorBoard. Training results for both models were evaluated based on:
+The models were trained using Hugging Face Transformers, and the training progress was monitored via TensorBoard. Early stopping was implemented with a patience of 2 epochs to avoid unnecessary computation and prevent overfitting, which ensured that models stopped training once they reached a plateau in validation performance. Training results for all models were evaluated based on:
 - **Training Loss**
 - **Validation Loss**
 - **Mean Squared Error (MSE)**
 - **R-squared (R2)**
 
-## Model Comparison and Results
+### Model Comparison and Results
 
-### Tiny Model (`albert-tiny-chinese-ws`)
-The **tiny model** demonstrated a rapid decrease in training loss from 0.8447 to 0.0869 over 6 epochs. However, it showed clear signs of **overfitting**, as the validation loss only decreased from 0.88 to 0.7, and the MSE showed diminishing improvement across epochs.
+#### **Tiny Model (`ckiplab/albert-tiny-chinese-ws`)**
+The **tiny model** demonstrated a rapid decrease in training loss from 1.0466 to 0.1079 over 7 epochs. However, it showed clear signs of **overfitting**, as the validation loss decreased from 0.8678 to 0.7109, and the MSE showed diminishing improvement across epochs. 
 
-| Epoch | Training Loss | Validation Loss | MSE   | R2    |
-|-------|---------------|-----------------|-------|-------|
-| 1     | 0.8447        | 0.8883          | 0.8883 | 0.0926 |
-| 2     | 0.7168        | 0.6970          | 0.6970 | 0.2880 |
-| 3     | 0.5550        | 0.6762          | 0.6762 | 0.3092 |
-| 4     | 0.2410        | 0.7097          | 0.7097 | 0.2750 |
-| 5     | 0.1484        | 0.7290          | 0.7290 | 0.2552 |
-| 6     | 0.0869        | 0.7035          | 0.7035 | 0.2814 |
+| Epoch | Training Loss | Validation Loss | MSE    | R2     |
+|-------|---------------|-----------------|--------|--------|
+| 1     | 1.0466        | 0.8678          | 0.8678 | 0.1135 |
+| 2     | 0.8377        | 0.7559          | 0.7559 | 0.2278 |
+| 3     | 0.6353        | 0.7577          | 0.7577 | 0.2260 |
+| 4     | 0.4008        | 0.7263          | 0.7263 | 0.2580 |
+| 5     | 0.2420        | 0.6836          | 0.6836 | 0.3017 |
+| 6     | 0.1733        | 0.7007          | 0.7007 | 0.2842 |
+| 7     | 0.1079        | 0.7109          | 0.7109 | 0.2738 |
 
-### Base Model (`ckiplab/albert-base-chinese-ws`)
-The **base model** performed significantly better than the tiny model, with the training loss dropping from 0.7595 to 0.0827. More importantly, the validation loss decreased from 0.6957 to around 0.47, indicating better generalization. However, from the 3rd epoch onwards, progress slowed, and performance improvements became marginal, suggesting that **early stopping** could be beneficial.
+#### **Base Model (`ckiplab/albert-base-chinese-ws`)**
+The **base model** performed significantly better than the tiny model, with the training loss dropping from 1.0879 to 0.0764. More importantly, the validation loss decreased from 0.7929 to 0.5285, indicating better generalization. From the 3rd epoch onwards, the rate of improvement slowed, with diminishing returns on both the training and validation loss. This suggests that **early stopping** was effective in preventing further overfitting, and training could have been stopped earlier for an optimal result.
 
-| Epoch | Training Loss | Validation Loss | MSE   | R2    |
-|-------|---------------|-----------------|-------|-------|
-| 1     | 0.7595        | 0.6957          | 0.6957 | 0.2893 |
-| 2     | 0.6043        | 0.6403          | 0.6403 | 0.3459 |
-| 3     | 0.4923        | 0.4826          | 0.4826 | 0.5070 |
-| 4     | 0.2478        | 0.4521          | 0.4521 | 0.5382 |
-| 5     | 0.1350        | 0.4772          | 0.4772 | 0.5125 |
-| 6     | 0.0827        | 0.4712          | 0.4712 | 0.5187 |
+| Epoch | Training Loss | Validation Loss | MSE    | R2     |
+|-------|---------------|-----------------|--------|--------|
+| 1     | 1.0879        | 0.7929          | 0.7929 | 0.1900 |
+| 2     | 0.6558        | 0.6462          | 0.6462 | 0.3399 |
+| 3     | 0.5119        | 0.8537          | 0.8537 | 0.1278 |
+| 4     | 0.2953        | 0.5346          | 0.5346 | 0.4539 |
+| 5     | 0.2177        | 0.5197          | 0.5197 | 0.4691 |
+| 6     | 0.1346        | 0.5378          | 0.5378 | 0.4506 |
+| 7     | 0.0764        | 0.5285          | 0.5285 | 0.4601 |
+
+#### **BERT Model (`ckiplab/bert-base-chinese-ws`)**
+The **BERT model** showed the most consistent improvement in both training and validation loss, with a training loss dropping from 0.9133 to 0.1467. The validation loss also decreased from 0.5979 to 0.4766. The **R2 score** remained high, indicating strong generalization.
+
+| Epoch | Training Loss | Validation Loss | MSE    | R2     |
+|-------|---------------|-----------------|--------|--------|
+| 1     | 0.9133        | 0.5979          | 0.5979 | 0.3892 |
+| 2     | 0.6050        | 0.5964          | 0.5964 | 0.3907 |
+| 3     | 0.4737        | 0.5990          | 0.5990 | 0.3881 |
+| 4     | 0.2897        | 0.4497          | 0.4497 | 0.5406 |
+| 5     | 0.2016        | 0.5614          | 0.5614 | 0.4265 |
+| 6     | 0.1467        | 0.4766          | 0.4766 | 0.5131 |
+
+#### **Google BERT (`google/bert-base-chinese`)**
+The **Google BERT** model exhibited strong performance, with the training loss dropping from 0.7514 to 0.1815, and the validation loss decreasing from 0.6246 to 0.4544. The **R2 score** peaked at 0.5886 in epoch 4, showing good performance overall.
+
+| Epoch | Training Loss | Validation Loss | MSE    | R2     |
+|-------|---------------|-----------------|--------|--------|
+| 1     | 0.7514        | 0.6246          | 0.6246 | 0.3619 |
+| 2     | 0.5945        | 0.6337          | 0.6337 | 0.3526 |
+| 3     | 0.4973        | 0.4710          | 0.4710 | 0.5188 |
+| 4     | 0.3020        | 0.4027          | 0.4027 | 0.5886 |
+| 5     | 0.2426        | 0.4609          | 0.4609 | 0.5292 |
+| 6     | 0.1815        | 0.4544          | 0.4544 | 0.5358 |
 
 ### Conclusion:
-- **Tiny Model**: Showed overfitting, with a significant gap between training and validation loss. MSE improvement was minimal, and the model's performance stabilized after the 3rd epoch.
-- **Base Model**: Outperformed the tiny model with a substantial decrease in both training and validation loss. The model's validation performance suggests better generalization, though further improvement was limited after the 3rd epoch. **Early stopping** could be explored to avoid overfitting.
+- **Tiny Model (`albert-tiny-chinese-ws`)**: Showed overfitting with a significant gap between training and validation loss. The MSE improvement was minimal, and the model's performance stabilized after the 3rd epoch.
+- **Base Model (`ckiplab/albert-base-chinese-ws`)**: Outperformed the tiny model with substantial decreases in both training and validation loss. The model showed better generalization, though improvements slowed after the 3rd epoch. **Early stopping** helped prevent overfitting by halting training early when further improvements became marginal.
+- **BERT Model (`ckiplab/bert-base-chinese-ws`)**: Performed consistently well with a steady decrease in both training and validation loss. The model showed strong generalization with high R2 scores.
+- **Google BERT (`google/bert-base-chinese`)**: Delivered strong results with steady improvement and good generalization, especially with the highest R2 score in epoch 4.
+
+<img width="1308" alt="image" src="https://github.com/user-attachments/assets/5682ed9b-fc09-40d4-b294-c439df7f20ea" />
+
+In summary, the **Google BERT** and **BERT base** models show the best overall performance, suggesting that fine-tuning these models for further epochs and hyperparameter tuning could yield even better results.
 
 ## Evaluation
 The evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
 
 ### Prerequisites
 * Python 3.x
+* Colab (for GPU if needed)
