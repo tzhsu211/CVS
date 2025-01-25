@@ -1,13 +1,11 @@
 # PTT CVS Product Review Analysis
 
-This project demonstrates a system for predicting product ratings based on reviews from PTT's CVS board using machine learning, specifically fine-tuning a pre-trained model. The tokenizer model used in this project is 'bert-base-chinese' and the pre-trained models used for comparison are 'ckiplab/albert-tiny-chinese-ws' and 'ckiplab/albert-base-chinese-ws'.
+This project showcases a system that predicts product ratings based on reviews from the CVS board on PTT, using machine learning, specifically fine-tuning pre-trained models. The pre-trained models used for comparison include 'ckiplab/albert-tiny-chinese-ws', 'ckiplab/albert-base-chinese-ws', 'ckiplab/bert-base-chinese-ws', and 'google/bert-base-chinese'.
 
 ## Project Overview
 * **Data Collection**: This project crawls product reviews from the CVS board of PTT, a popular bulletin board system in Taiwan. The crawler collects product names, links, stores, ratings, and user reviews.
-
-* **Model Training**: The reviews and ratings are used to fine-tune two pre-trained models: `albert-tiny-chinese-ws` (a small version of ALBERT) and `ckiplab/albert-base-chinese-ws` (a base version of ALBERT). The models are fine-tuned on the reviews to predict product ratings.
- 
-* **Evaluation**: The model's performance is evaluated using Mean Squared Error (MSE) and R-squared (R2). Training progress is also monitored via TensorBoard.
+* **Model Training**: The reviews and ratings are used to fine-tune several pre-trained models: albert-tiny-chinese-ws (a smaller version of ALBERT), ckiplab/albert-base-chinese-ws (the base version of ALBERT), ckiplab/bert-base-chinese-ws (a base variant of BERT), and google/bert-base-chinese (one of the most popular Chinese models). The CKIP models are trained in Traditional Chinese, which aligns with most of the review content, while the Google BERT model is widely recognized for its strong performance in Chinese NLP tasks. I fine-tune these models using the reviews to predict product ratings.
+* **Evaluation**: The models' performance is evaluated using Mean Squared Error (MSE) and R-squared (R2). Training progress is monitored using TensorBoard.
  
 ## Dataset
 This dataset is collected from the [商品] posts on the PTT CVS board using web scraping. It contains user reviews of convenience store products along with corresponding ratings. Each entry includes the product name, price, store name, product specifications, caloric content, rating, and the user's review. This dataset is intended for predicting ratings based on the review content.
@@ -29,7 +27,7 @@ Below is an example of the dataset:
 ## Data Collection and Cleaning
 
 ### Data Collection (Web Scraping)
-The dataset is collected through web scraping from the PTT CVS board, a popular online forum in Taiwan. We use Python's requests library to fetch the pages, and BeautifulSoup to parse the HTML content. The scraper specifically targets posts that start with "[商品]", indicating that they are product-related discussions.
+The dataset is collected through web scraping from the PTT CVS board, a popular online forum in Taiwan. I use Python's requests library to fetch the pages, and BeautifulSoup to parse the HTML content. The scraper specifically targets posts that start with "[商品]", indicating that they are product-related discussions.
 
 The following information is extracted from each post:
 * Product name and price
@@ -38,7 +36,7 @@ The following information is extracted from each post:
 * User review
 * Page link
   
-To ensure robust data collection, we use retries to handle connection issues and avoid overloading the server.
+To ensure robust data collection, we implement retries to handle connection issues and prevent overloading the server.
 
 ### Data Cleaning
 After collecting the raw data, several cleaning steps are performed on the product reviews to ensure quality:
@@ -47,6 +45,8 @@ After collecting the raw data, several cleaning steps are performed on the produ
 3. **Removing Unwanted Text**: Certain phrases, such as disclaimers and promotional statements, are removed to focus on the core content.
 4. **Extracting Ratings**: The product ratings are extracted, ensuring they fall within a valid range (0-100).
 5. **Cleaning Reviews**: Unnecessary spaces, newlines, and unwanted text are removed from the reviews to ensure they are clean and readable.
+
+In order to achieve our goal of predicting product ratings, only Review and Rating are used in model training.
 
 ## Model Training
 
@@ -61,10 +61,10 @@ BERT is a pre-trained NLP model initially introduced by Google. It is a large mo
 ALBERT (A Lite BERT) is a smaller, more efficient variant of BERT. ALBERT reduces the model size by sharing parameters across layers, which significantly reduces the total number of parameters compared to BERT. Despite this reduction in size, ALBERT aims to match or even surpass BERT's performance on certain tasks. This efficiency is achieved through techniques like parameter sharing and factorized embedding parameterization, allowing ALBERT to maintain strong performance while being more computationally efficient.
 
 ### Model Structure Adjustment
-Since this is a regression task, all models' final layers were replaced with a linear layer suitable for regression. The last layer outputs a single value representing the predicted score for the product review.
+Since this is a regression task, the final layers of all models were replaced with a linear layer appropriate for regression. The final layer outputs a single value, representing the predicted score for the product review.
 
 ### Training and Evaluation
-The models were trained using Hugging Face Transformers, and the training progress was monitored via TensorBoard. Early stopping was implemented with a patience of 2 epochs to avoid unnecessary computation and prevent overfitting, which ensured that models stopped training once they reached a plateau in validation performance. Training results for all models were evaluated based on:
+The models were trained using HuggingFace Transformers, and training progress was monitored via TensorBoard. Early stopping was implemented with a patience of 2 epochs to avoid unnecessary computation and prevent overfitting, which ensured that models stopped training once they reached a plateau in validation performance. Training results for all models were evaluated based on:
 - **Training Loss**
 - **Validation Loss**
 - **Mean Squared Error (MSE)**
@@ -73,7 +73,7 @@ The models were trained using Hugging Face Transformers, and the training progre
 ### Model Comparison and Results
 
 #### **Tiny Model (`ckiplab/albert-tiny-chinese-ws`)**
-The **tiny model** demonstrated a rapid decrease in training loss from 1.0466 to 0.1079 over 7 epochs. However, it showed clear signs of **overfitting**, as the validation loss decreased from 0.8678 to 0.7109, and the MSE showed diminishing improvement across epochs. 
+The **tiny model** demonstrated a rapid decrease in training loss from 1.0466 to 0.1079 over 7 epochs. However, it showed clear signs of **overfitting**, as the validation loss decreased from 0.8678 to 0.7109, and the MSE showed diminishing improvements across epochs. 
 
 | Epoch | Training Loss | Validation Loss | MSE    | R2     |
 |-------|---------------|-----------------|--------|--------|
@@ -130,10 +130,10 @@ The **Google BERT** model exhibited strong performance, with the training loss d
 
 <img width="1308" alt="image" src="https://github.com/user-attachments/assets/5682ed9b-fc09-40d4-b294-c439df7f20ea" />
 
-In summary, the **Google BERT** and **BERT base** models show the best overall performance, suggesting that fine-tuning these models for further epochs and hyperparameter tuning could yield even better results.
+In summary, the **Google BERT** and **BERT base** models showed the best overall performance, suggesting that fine-tuning these models for additional epochs and hyperparameter tuning could yield even better results.
 
 ## Evaluation
-The evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
+Evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
 
 ### Prerequisites
 * Python 3.x
