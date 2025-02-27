@@ -122,7 +122,7 @@ The **Google BERT** model exhibited strong performance, with the training loss d
 | 5     | 0.2426        | 0.4609          | 0.4609 | 0.5292 |
 | 6     | 0.1815        | 0.4544          | 0.4544 | 0.5358 |
 
-### Conclusion:
+### Model training summary:
 - **Tiny Model (`albert-tiny-chinese-ws`)**: Showed overfitting with a significant gap between training and validation loss. The MSE improvement was minimal, and the model's performance stabilized after the 3rd epoch.
 - **Base Model (`ckiplab/albert-base-chinese-ws`)**: Outperformed the tiny model with substantial decreases in both training and validation loss. The model showed better generalization, though improvements slowed after the 3rd epoch. **Early stopping** helped prevent overfitting by halting training early when further improvements became marginal.
 - **BERT Model (`ckiplab/bert-base-chinese-ws`)**: Performed consistently well with a steady decrease in both training and validation loss. The model showed strong generalization with high R2 scores.
@@ -134,6 +134,32 @@ In summary, the **Google BERT** and **BERT base** models showed the best overall
 
 ## Evaluation
 Evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
+
+## Fine tuning
+The model optimization was performed using **Optuna**, an automatic hyperparameter optimization framework. The hyperparameters optimized include learning rate, batch size, dropout rate, and weight decay. Optuna helped find the most optimal combination of these hyperparameters to minimize the validation loss and avoid overfitting.
+
+### Optimizer Settings
+We utilized Optuna to explore various combinations of the following hyperparameters:
+- **Learning rate**: A logarithmic uniform search was performed within the range of `1e-6` to `1e-3` to find the optimal learning rate for each model.
+- **Batch size**: We selected different batch sizes (`8`, `16`, `32`, `64`) to investigate how the model's performance scales with different data processing sizes.
+- **Dropout rate**: We experimented with dropout values between `0.1` and `0.5` to prevent overfitting while maintaining model generalization.
+- **Weight decay**: A logarithmic uniform search was also applied to weight decay between `0.01` and `0.1` to minimize overfitting and improve regularization.
+
+Optuna’s optimization process efficiently searched for the best hyperparameters across a series of trials, and the best-performing configuration was used for final model training. This approach helped us avoid the manual trial-and-error process and allowed us to tune the hyperparameters effectively, resulting in models with better generalization and improved validation metrics.
+
+### Hyperparameter Optimization Results
+For instance, the **Google BERT** model achieved the best performance with a validation loss of **0.484985** when using a learning rate of `1.216e-05`, a batch size of `64`, a dropout rate of `0.499`, and a weight decay of `0.071`. These parameters minimized the validation loss and resulted in the highest R2 score across all models, showcasing the effectiveness of the fine-tuning process. However, it is important to note that the fine-tuned model’s performance did not surpass the pretrained Google BERT’s validation loss of **0.4027**.
+
+### Fine-tuning Results
+| Epoch | Training Loss | Validation Loss | MSE    | R2     |
+|-------|---------------|-----------------|--------|--------|
+| 1     | 0.138400      | 0.581793        | 0.581793 | 0.405655 |
+| 2     | 0.242500      | 0.575806        | 0.575806 | 0.411772 |
+| 3     | 0.215900      | 0.545362        | 0.545362 | 0.442872 |
+| 4     | 0.119100      | 0.493906        | 0.493906 | 0.495438 |
+| 5     | 0.077600      | 0.484985        | 0.484985 | 0.504552 |
+
+*Trial 5 finished with value: 0.4867355525493622 and parameters: {'learning_rate': 1.2164779313818263e-05, 'dropout': 0.4994502311555332, 'batch_size': 64, 'weight_decay': 0.07121529801477762}. Best is trial 4 with value: 0.4849853217601776.*
 
 ### Prerequisites
 * Python 3.x
