@@ -135,6 +135,8 @@ In summary, the **Google BERT** and **BERT base** models showed the best overall
 ## Evaluation
 Evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
 
+
+
 ## Fine tuning
 The model optimization was performed using **Optuna**, an automatic hyperparameter optimization framework. The hyperparameters optimized include learning rate, batch size, dropout rate, and weight decay. Optuna helped find the most optimal combination of these hyperparameters to minimize the validation loss and avoid overfitting.
 
