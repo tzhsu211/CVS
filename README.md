@@ -1,12 +1,14 @@
-# PTT CVS Product Review Analysis
+# PTT CVS Product Review Rating Prediction
 
 This project showcases a system that predicts product ratings based on reviews from the CVS board on PTT, using machine learning, specifically fine-tuning pre-trained models. The pre-trained models used for comparison include 'ckiplab/albert-tiny-chinese-ws', 'ckiplab/albert-base-chinese-ws', 'ckiplab/bert-base-chinese-ws', and 'google/bert-base-chinese'.
 
 ## Project Overview
-* **Data Collection**: This project crawls product reviews from the CVS board of PTT, a popular bulletin board system in Taiwan. The crawler collects product names, links, stores, ratings, and user reviews.
-* **Model Training**: The reviews and ratings are used to fine-tune several pre-trained models: albert-tiny-chinese-ws (a smaller version of ALBERT), ckiplab/albert-base-chinese-ws (the base version of ALBERT), ckiplab/bert-base-chinese-ws (a base variant of BERT), and google/bert-base-chinese (one of the most popular Chinese models). The CKIP models are trained in Traditional Chinese, which aligns with most of the review content, while the Google BERT model is widely recognized for its strong performance in Chinese NLP tasks. I fine-tune these models using the reviews to predict product ratings.
-* **Evaluation**: The models' performance is evaluated using Mean Squared Error (MSE) and R-squared (R2). Training progress is monitored using TensorBoard.
- 
+This project predicts product ratings based on reviews from the CVS board on PTT, a popular Taiwanese bulletin board. It leverages fine-tuning on pre-trained models, including 'ckiplab/albert-tiny-chinese-ws', 'ckiplab/albert-base-chinese-ws', 'ckiplab/bert-base-chinese-ws', and 'google/bert-base-chinese'. Specifically, the task is to predict a product’s rating from the user's review text.
+
+* **Data Collection:** We collect product reviews from the PTT CVS board, which includes product names, links, stores, ratings, and user reviews.
+* **Model Training:** The reviews are used to fine-tune four pre-trained models: ALBERT (tiny and base) and BERT (base). These models are fine-tuned for regression tasks, where the goal is to predict the product's rating from review text.
+* **Evaluation:** Models are evaluated based on Mean Squared Error (MSE) and R-squared (R2). Training progress is visualized using TensorBoard.
+
 ## Dataset
 This dataset is collected from the [商品] posts on the PTT CVS board using web scraping. It contains user reviews of convenience store products along with corresponding ratings. Each entry includes the product name, price, store name, product specifications, caloric content, rating, and the user's review. This dataset is intended for predicting ratings based on the review content.
 
