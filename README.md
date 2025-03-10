@@ -113,7 +113,7 @@ The **BERT model** showed the most consistent improvement in both training and v
 | 6     | 0.1467        | 0.4766          | 0.4766 | 0.5131 |
 
 #### **Google BERT (`google/bert-base-chinese`)**
-The **Google BERT** model exhibited strong performance, with the training loss dropping from 0.7514 to 0.1815, and the validation loss decreasing from 0.6246 to 0.4544. The **R2 score** peaked at 0.5886 in epoch 4, showing good performance overall.
+The **Google BERT** model exhibited strong performance, with the training loss dropping from 0.7514 to 0.1815, and the validation loss decreasing from 0.6246 to 0.4544. The validation loss achieved its best value of 0.4027 at epoch 4, indicating a significant improvement. The **R2 score** peaked at 0.5886 in epoch 4, showing good performance overall.
 
 | Epoch | Training Loss | Validation Loss | MSE    | R2     |
 |-------|---------------|-----------------|--------|--------|
@@ -131,6 +131,8 @@ The **Google BERT** model exhibited strong performance, with the training loss d
 - **Google BERT (`google/bert-base-chinese`)**: Delivered strong results with steady improvement and good generalization, especially with the highest R2 score in epoch 4.
 
 <img width="1308" alt="image" src="https://github.com/user-attachments/assets/5682ed9b-fc09-40d4-b294-c439df7f20ea" />
+
+*The chart above shows the training and validation performance across different epochs.*
 
 In summary, the **Google BERT** and **BERT base** models showed the best overall performance, suggesting that fine-tuning these models for additional epochs and hyperparameter tuning could yield even better results.
 
