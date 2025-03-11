@@ -5,12 +5,12 @@ This project showcases a system that predicts product ratings based on reviews f
 ## Project Overview
 This project predicts product ratings based on reviews from the CVS board on PTT, a popular Taiwanese bulletin board. It leverages fine-tuning on pre-trained models, including 'ckiplab/albert-tiny-chinese-ws', 'ckiplab/albert-base-chinese-ws', 'ckiplab/bert-base-chinese-ws', and 'google/bert-base-chinese'. Specifically, the task is to predict a product’s rating from the user's review text.
 
-* **Data Collection:** We collect product reviews from the PTT CVS board, which includes product names, links, stores, ratings, and user reviews.
+* **Data Collection:** I collect product reviews from the PTT CVS board, which includes product names, links, stores, ratings, and user reviews.
 * **Model Training:** The reviews are used to fine-tune four pre-trained models: ALBERT (tiny and base) and BERT (base). These models are fine-tuned for regression tasks, where the goal is to predict the product's rating from review text.
-* **Evaluation:** Models are evaluated based on Mean Squared Error (MSE) and R-squared (R2). Training progress is visualized using TensorBoard.
+* **Evaluation:** Models are evaluated based on Mean Squared Error (MSE) and R-squared (R2).
 
 ## Dataset
-This dataset is collected from the [商品] posts on the PTT CVS board using web scraping. It contains user reviews of convenience store products along with corresponding ratings. Each entry includes the product name, price, store name, product specifications, caloric content, rating, and the user's review. This dataset is intended for predicting ratings based on the review content.
+This dataset is collected from the [商品] posts on the PTT CVS board using web scraping. It contains user reviews of convenience store products along with corresponding ratings. Each entry includes the product name, price, store name, rating, and the user's review. This dataset is intended for predicting ratings based on the review content.
 
 * **Product name/price 商品名稱/價格**: The name of the product and its price.
 * **Link 頁面連結**: The link to the product review page.
@@ -38,7 +38,7 @@ The following information is extracted from each post:
 * User review
 * Page link
   
-To ensure robust data collection, we implement retries to handle connection issues and prevent overloading the server.
+To ensure robust data collection, I implement retries to handle connection issues and prevent overloading the server.
 
 ### Data Cleaning
 After collecting the raw data, several cleaning steps are performed on the product reviews to ensure quality:
@@ -53,14 +53,17 @@ In order to achieve our goal of predicting product ratings, only Review and Rati
 ## Model Training
 
 ### Model Selection and Initialization
-In this project, we fine-tuned four pre-trained ALBERT and BERT models for the regression task:
-- **albert-tiny-chinese-ws**: A lightweight, smaller variant of ALBERT.
+In this project, I fine-tuned four pre-trained ALBERT and BERT models for the regression task:
+- **ckiplab/albert-tiny-chinese-ws**: A lightweight, smaller variant of ALBERT.
 - **ckiplab/albert-base-chinese-ws**: A larger, base variant of ALBERT.
 - **ckiplab/bert-base-chinese-ws**: Base variant of BERT.
 - **google/bert-base-chinese**: Google BERT base model.
-BERT is a pre-trained NLP model initially introduced by Google. It is a large model that leverages a bidirectional Transformer architecture to capture the context of words from both the left and the right sides. While BERT achieves excellent performance on a variety of NLP tasks, its large size makes it computationally expensive.
+- 
+BERT, introduced by Google, is a powerful pre-trained NLP model that leverages a bidirectional Transformer architecture to capture the context of words from both the left and right sides. While BERT performs excellently on various NLP tasks, its large size makes it computationally expensive.
 
-ALBERT (A Lite BERT) is a smaller, more efficient variant of BERT. ALBERT reduces the model size by sharing parameters across layers, which significantly reduces the total number of parameters compared to BERT. Despite this reduction in size, ALBERT aims to match or even surpass BERT's performance on certain tasks. This efficiency is achieved through techniques like parameter sharing and factorized embedding parameterization, allowing ALBERT to maintain strong performance while being more computationally efficient.
+ALBERT (A Lite BERT) is a more efficient variant of BERT, designed to reduce model size while maintaining performance. ALBERT achieves this by sharing parameters across layers, reducing the number of parameters compared to BERT. This allows ALBERT to deliver strong results while being computationally more efficient.
+
+CKIPLab (Chinese Knowledge and Information Processing Lab) is a renowned research group based in Taiwan, specializing in natural language processing for Traditional Chinese, commonly used in Taiwan and other regions. Their pre-trained models are optimized for Taiwanese language nuances, including informal expressions and cultural context. These models are particularly well-suited for my project, which uses data from an online forum in Taiwan, as they capture the regional and linguistic features of the data more effectively.
 
 ### Model Structure Adjustment
 Since this is a regression task, the final layers of all models were replaced with a linear layer appropriate for regression. The final layer outputs a single value, representing the predicted score for the product review.
@@ -71,6 +74,7 @@ The models were trained using HuggingFace Transformers, and training progress wa
 - **Validation Loss**
 - **Mean Squared Error (MSE)**
 - **R-squared (R2)**
+Note that the Validation Loss output from HuggingFace Transformers corresponds to MSE, as both represent the same metric in this case.
 
 ### Model Comparison and Results
 
@@ -140,16 +144,14 @@ In summary, the **Google BERT** and **BERT base** models showed the best overall
 ## Evaluation
 Evaluation is done using the Mean Squared Error (MSE) and R-squared (R2) metrics. Both models are evaluated using these metrics, and the results are monitored throughout the training process.
 
-
-
 ## Fine tuning
 The model optimization was performed using **Optuna**, an automatic hyperparameter optimization framework. The hyperparameters optimized include learning rate, batch size, dropout rate, and weight decay. Optuna helped find the most optimal combination of these hyperparameters to minimize the validation loss and avoid overfitting.
 
 ### Optimizer Settings
-We utilized Optuna to explore various combinations of the following hyperparameters:
+I utilized Optuna to explore various combinations of the following hyperparameters:
 - **Learning rate**: A logarithmic uniform search was performed within the range of `1e-6` to `1e-3` to find the optimal learning rate for each model.
-- **Batch size**: We selected different batch sizes (`8`, `16`, `32`, `64`) to investigate how the model's performance scales with different data processing sizes.
-- **Dropout rate**: We experimented with dropout values between `0.1` and `0.5` to prevent overfitting while maintaining model generalization.
+- **Batch size**: I selected different batch sizes (`8`, `16`, `32`, `64`) to investigate how the model's performance scales with different data processing sizes.
+- **Dropout rate**: I experimented with dropout values between `0.1` and `0.5` to prevent overfitting while maintaining model generalization.
 - **Weight decay**: A logarithmic uniform search was also applied to weight decay between `0.01` and `0.1` to minimize overfitting and improve regularization.
 
 Optuna’s optimization process efficiently searched for the best hyperparameters across a series of trials, and the best-performing configuration was used for final model training. This approach helped us avoid the manual trial-and-error process and allowed us to tune the hyperparameters effectively, resulting in models with better generalization and improved validation metrics.
